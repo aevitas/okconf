@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -13,21 +15,21 @@ var (
 	errBuffNotWritten = errors.New("could not write full buffer to file; config may be corrupt on disk")
 )
 
-// loads the default configuration as returned by config.Default()
-func Load[T Config]() T {
+// loads the default configuration as returned by config.Default
+func Load[T Config]() *T {
 	return defaultCfg[T]()
 }
 
 // loads config from the specified JSON file, using the default configuration as a starting point
-func LoadJSON[T Config](file string) (T, error) {
+func FromJSON[T Config](file string) (*T, error) {
 	fp, err := filepath.Abs(file)
 	if err != nil {
-		return *new(T), err
+		return new(T), err
 	}
 
 	f, err := os.Open(fp)
 	if err != nil {
-		return *new(T), err
+		return new(T), err
 	}
 
 	defer f.Close()
@@ -63,27 +65,47 @@ func SaveJSON[T Config](cfg T, file string) error {
 	return nil
 }
 
-func fromJSONStream[T Config](conf T, reader io.Reader) (T, error) {
-	var buf []byte
-	_, err := reader.Read(buf)
-	if err != nil {
-		return *new(T), err
-	}
-
+func fromJSONStream[T Config](conf *T, reader io.Reader) (*T, error) {
 	dec := json.NewDecoder(reader)
-	err = dec.Decode(&conf)
+	err := dec.Decode(&conf)
 	if err != nil {
-		return *new(T), err
+		return new(T), err
 	}
 
 	return conf, nil
 }
 
-func defaultCfg[T Config]() T {
+func FromYAML[T Config](file string) (*T, error) {
+	fp, err := filepath.Abs(file)
+	if err != nil {
+		return new(T), err
+	}
+
+	f, err := os.Open(fp)
+	if err != nil {
+		return new(T), err
+	}
+
+	defer f.Close()
+
+	return fromYAMLStream(defaultCfg[T](), f)
+}
+
+func fromYAMLStream[T Config](cfg *T, r io.Reader) (*T, error) {
+	dec := yaml.NewDecoder(r)
+
+	if err := dec.Decode(cfg); err != nil {
+		return new(T), err
+	}
+
+	return cfg, nil
+}
+
+func defaultCfg[T Config]() *T {
 	var cfg T
 	cfg = cfg.Default().(T)
 
-	return cfg
+	return &cfg
 }
 
 type Config interface {

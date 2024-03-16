@@ -1,7 +1,6 @@
 package okconf
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,8 +25,8 @@ func TestLoadDefault(t *testing.T) {
 	}
 }
 
-func TestLoadJSON(t *testing.T) {
-	json := "{\"StartedAt\":\"2024-01-01T13:37:00.000000Z\",\"Nested\":{\"Count\":200}}"
+func TestFromJSON(t *testing.T) {
+	json := "{\"started_at\":\"2024-01-01T13:37:00.000000Z\",\"nested\":{\"Count\":200}}"
 	f, err := os.CreateTemp("", "test-conf-*.json")
 	if err != nil {
 		t.Error(err)
@@ -42,7 +41,7 @@ func TestLoadJSON(t *testing.T) {
 		t.Error(err)
 	}
 
-	cfg, err := LoadJSON[ExampleConfig](p)
+	cfg, err := FromJSON[ExampleConfig](p)
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,8 +50,6 @@ func TestLoadJSON(t *testing.T) {
 		t.Fail()
 	}
 
-	s := cfg.StartedAt.String()
-	log.Print(s)
 	if cfg.StartedAt.String() != "2024-01-01 13:37:00 +0000 UTC" {
 		t.Fail()
 	}
@@ -73,14 +70,48 @@ func TestSaveJSON(t *testing.T) {
 	SaveJSON(cfg, tmp.Name())
 }
 
+func TestFromYAML(t *testing.T) {
+	yml := "name: Bar\nstartedAt: 2024-01-01T13:37:00.000000Z\nnested:\n    count: 100\n"
+	f, err := os.CreateTemp("", "test-conf-*.yml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer f.Close()
+
+	f.WriteString(yml)
+
+	p, err := filepath.Abs(f.Name())
+	if err != nil {
+		t.Error(err)
+	}
+
+	cfg, err := FromYAML[ExampleConfig](p)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if cfg.Name != "Bar" {
+		t.Fail()
+	}
+
+	if cfg.StartedAt.String() != "2024-01-01 13:37:00 +0000 UTC" {
+		t.Fail()
+	}
+
+	if cfg.Nested.Count != 100 {
+		t.Fail()
+	}
+}
+
 type ExampleConfig struct {
-	Name      string
-	StartedAt time.Time
-	Nested    NestedConfig
+	Name      string       `yaml:"name" json:"name"`
+	StartedAt time.Time    `yaml:"startedAt" json:"started_at"`
+	Nested    NestedConfig `yaml:"nested" json:"nested"`
 }
 
 type NestedConfig struct {
-	Count int
+	Count int `yaml:"count" json:"count"`
 }
 
 func (e ExampleConfig) Default() Config {
