@@ -6,10 +6,7 @@
 
 okconf is a simple, unambitious config library that gets out of the way. It was created as an alternative to contrast libraries such as [spf13/viper](https://github.com/spf13/viper), which &mdash; while extremely potent &mdash; require a fair amount of ceremony in order to get going.
 
-okconf takes a more minimalist approach. Define your configuration as a `struct`, implement a `Default()` for it, and okconf will handle loading and saving it to various formats:
-
-* JSON
-* YAML
+okconf takes a more minimalist approach. Define your configuration as a `struct`, implement a `Default()` for it, and okconf will handle loading from and saving to JSON or YAML.
 
 ## Install
 
@@ -64,6 +61,3 @@ okconf provides various methods to save your config, e.g.:
 ```golang
 okconf.SaveJSON(cfg, "file.json")
 ```
-
-## Contributions
-
