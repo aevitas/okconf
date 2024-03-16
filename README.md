@@ -8,6 +8,8 @@ okconf is a simple, unambitious config library that gets out of the way. It was 
 
 okconf takes a more minimalist approach. Define your configuration as a `struct`, implement a `Default()` for it, and okconf will handle loading from and saving to JSON or YAML.
 
+Despite its simplicity, okconf supports complex nested configuration structures and many different data types.
+
 ## Install
 
 Add okconf to your project:
