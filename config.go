@@ -35,6 +35,7 @@ func LoadJSON[T Config](file string) (T, error) {
 	return fromJSONStream[T](defaultCfg[T](), f)
 }
 
+// saves the
 func SaveJSON[T Config](cfg T, file string) error {
 	if !filepath.IsAbs(file) {
 		return errPathNotAbs
