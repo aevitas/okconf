@@ -67,7 +67,9 @@ func TestSaveJSON(t *testing.T) {
 		t.Error(err)
 	}
 
-	SaveJSON(cfg, tmp.Name())
+	if err := SaveJSON(cfg, tmp.Name()); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestFromYAML(t *testing.T) {
@@ -101,6 +103,19 @@ func TestFromYAML(t *testing.T) {
 
 	if cfg.Nested.Count != 100 {
 		t.Fail()
+	}
+}
+
+func TestSaveYaml(t *testing.T) {
+	cfg := Load[ExampleConfig]()
+
+	tmp, err := os.CreateTemp("", "save-conf-*.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := SaveYAML(cfg, tmp.Name()); err != nil {
+		t.Error(err)
 	}
 }
 

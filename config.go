@@ -37,29 +37,15 @@ func FromJSON[T Config](file string) (*T, error) {
 	return fromJSONStream[T](defaultCfg[T](), f)
 }
 
-// flattens and saves the configuration to the specified file
+// flattens and saves the configuration to the specified JSON file
 func SaveJSON[T Config](cfg T, file string) error {
-	if !filepath.IsAbs(file) {
-		return errPathNotAbs
-	}
-
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-
 	buf, err := json.Marshal(cfg)
 	if err != nil {
 		return err
 	}
 
-	nw, err := f.Write(buf)
-	if err != nil {
+	if err := saveFile(file, buf); err != nil {
 		return err
-	}
-
-	if nw != len(buf) {
-		return errBuffNotWritten
 	}
 
 	return nil
@@ -90,6 +76,42 @@ func FromYAML[T Config](file string) (*T, error) {
 	defer f.Close()
 
 	return fromYAMLStream(defaultCfg[T](), f)
+}
+
+func saveFile(file string, buf []byte) error {
+	if !filepath.IsAbs(file) {
+		return errPathNotAbs
+	}
+
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+
+	nw, err := f.Write(buf)
+	if err != nil {
+		return err
+	}
+
+	if nw != len(buf) {
+		return errBuffNotWritten
+	}
+
+	return nil
+}
+
+// flattens and saves the specified configuration to a YAML file
+func SaveYAML[T Config](cfg T, file string) error {
+	buf, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	if err := saveFile(file, buf); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func fromYAMLStream[T Config](cfg *T, r io.Reader) (*T, error) {
