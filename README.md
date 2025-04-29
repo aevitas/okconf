@@ -54,7 +54,7 @@ Then, simply `Load` your config from your preferred source. For instance, to loa
 cfg, err := okconf.LoadJSON[ExampleConfig]("/path/to/file")
 ```
 
-The `cfg` variable now holds an `ExampleConfig` value with the values in the JSON file applied to the default config.
+The `cfg` variable now holds an `ExampleConfig` value with the values in the JSON file overriding the default config values.
 
 ### Saving
 
